@@ -1402,49 +1402,153 @@ function setFieldError(
 }
 
 
-function getFriendlyErrorMessage(error) {
+ function getFriendlyErrorMessage(error) {
+  const rawMessage =
+    String(
+      error?.message ??
+      error?.cause?.message ??
+      ""
+    ).trim();
+
+  const code =
+    String(
+      error?.code ??
+      error?.cause?.code ??
+      ""
+    ).trim();
+
+  const details =
+    String(
+      error?.details ??
+      error?.cause?.details ??
+      ""
+    ).trim();
+
+  const hint =
+    String(
+      error?.hint ??
+      error?.cause?.hint ??
+      ""
+    ).trim();
+
+
+  /*
+   * Authentication
+   */
+  if (
+    code === "42501" ||
+    /permission|row-level security|rls|not allowed/i.test(
+      rawMessage
+    )
+  ) {
+    return (
+      "Database permission error। " +
+      "আপনার account-এর Mess access/RLS policy পরীক্ষা করতে হবে।\n\n" +
+      rawMessage
+    );
+  }
+
+
+  /*
+   * Invalid/check constraint
+   */
+  if (
+    code === "23514" ||
+    /check constraint|violates check constraint|invalid/i.test(
+      rawMessage
+    )
+  ) {
+    return (
+      "Database validation error:\n" +
+      rawMessage
+    );
+  }
+
+
+  /*
+   * Missing column/function/object
+   */
+  if (
+    code === "42703" ||
+    code === "42883" ||
+    /column .* does not exist|function .* does not exist/i.test(
+      rawMessage
+    )
+  ) {
+    return (
+      "Database structure mismatch:\n" +
+      rawMessage
+    );
+  }
+
+
+  /*
+   * Duplicate
+   */
+  if (
+    code === "23505" ||
+    /duplicate|already exists|unique constraint/i.test(
+      rawMessage
+    )
+  ) {
+    return (
+      "Duplicate data error:\n" +
+      rawMessage
+    );
+  }
+
+
+  /*
+   * Foreign key
+   */
+  if (
+    code === "23503" ||
+    /foreign key/i.test(rawMessage)
+  ) {
+    return (
+      "Database relation error:\n" +
+      rawMessage
+    );
+  }
+
+
+  /*
+   * Network
+   */
+  if (
+    /network|fetch|failed to fetch/i.test(
+      rawMessage
+    )
+  ) {
+    return (
+      "Internet connection বা Supabase connection সমস্যা হয়েছে।"
+    );
+  }
+
+
+  /*
+   * Fallback:
+   * show the real database message instead of hiding it.
+   */
+  const diagnosticParts = [
+    rawMessage,
+    details,
+    hint,
+  ].filter(Boolean);
+
+  if (diagnosticParts.length) {
+    return diagnosticParts.join("\n");
+  }
+
+
+  /*
+   * Last fallback.
+   */
   const normalized =
     normalizeSupabaseError(error);
 
-
-  if (
-    normalized?.message
-  ) {
-    return normalized.message;
-  }
-
-
-  const message =
-    error?.message ?? "";
-
-
-  if (
-    /duplicate/i.test(message)
-  ) {
-    return "এই তথ্যটি আগে থেকেই আছে।";
-  }
-
-
-  if (
-    /permission|policy|rls|row-level/i.test(
-      message
-    )
-  ) {
-    return "এই কাজ করার অনুমতি পাওয়া যায়নি।";
-  }
-
-
-  if (
-    /network|fetch|failed to fetch/i.test(
-      message
-    )
-  ) {
-    return "Internet connection পরীক্ষা করে আবার চেষ্টা করুন।";
-  }
-
-
   return (
-    message ||
+    normalized?.message ||
     "Mess তৈরি করা যায়নি। আবার চেষ্টা করুন।"
   );
 }
