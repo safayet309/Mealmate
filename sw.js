@@ -15,7 +15,7 @@
    - Controlled data synchronization
    ========================================================= */
 
-const CACHE_NAME = "mealmate-static-v1";
+const CACHE_NAME = "mealmate-static-v2";
 
 const CORE_ASSETS = [
   "./",
