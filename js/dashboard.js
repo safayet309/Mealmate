@@ -148,25 +148,40 @@ async function loadDashboardData() {
    * Current Mess
    */
   const {
-    data: mess,
-    error: messError,
+    data: membership,
+    error: membershipError,
   } = await supabase
-    .from("mess")
+    .from("mess_users")
     .select(`
+    id,
+    mess_id,
+    role,
+    active,
+    created_at,
+    mess:mess_id (
       id,
       name,
       room_start,
       room_end,
       border_count
-    `)
-    .eq("created_by", userId)
+    )
+  `)
+    .eq("user_id", userId)
+    .eq("active", true)
+    .order("created_at", {
+      ascending: false,
+    })
     .limit(1)
     .maybeSingle();
 
 
-  if (messError) {
-    throw messError;
+  if (membershipError) {
+    throw membershipError;
   }
+
+
+  const mess =
+    membership?.mess ?? null;
 
 
   /*
@@ -480,7 +495,7 @@ function calculateMoneySummary(transactions) {
         );
 
       switch (
-        transaction.transaction_type
+      transaction.transaction_type
       ) {
 
         case "deposit":
