@@ -3,16 +3,27 @@
    File: js/dashboard.js
 
    Responsibilities:
-   - Load current Mess
-   - Load active member count
-   - Load today's meal summary
-   - Load today's guest summary
-   - Load money summary
-   - Calculate current balance
-   - Update dashboard UI
+   - Resolve current Mess
+   - Load active members
+   - Load today's meals
+   - Load today's guest meals
+   - Load money transactions
+   - Calculate dashboard statistics
+   - Render live dashboard data
 
-   Depends on:
-   - js/supabase.js
+   Current database contract:
+   daily_meals
+   - meal_type
+   - expense
+
+   guest_meals
+   - quantity
+   - rate
+   - expense
+
+   money_transactions
+   - transaction_type
+   - amount
    ========================================================= */
 
 import {
@@ -22,28 +33,51 @@ import {
 
 
 /* =========================================================
-   CONSTANTS
+   SELECTORS
    ========================================================= */
 
-const DASHBOARD_SELECTORS = {
-  messName: '[data-dashboard="mess-name"]',
-  memberCount: '[data-dashboard="member-count"]',
+const SELECTORS = {
+  messName:
+    '[data-dashboard="mess-name"]',
 
-  totalDeposit: '[data-dashboard="total-deposit"]',
-  mealExpense: '[data-dashboard="meal-expense"]',
-  currentBalance: '[data-dashboard="current-balance"]',
-  balanceStatus: '[data-dashboard="balance-status"]',
+  memberCount:
+    '[data-dashboard="member-count"]',
 
-  fullCount: '[data-dashboard="full-count"]',
-  dayCount: '[data-dashboard="day-count"]',
-  nightCount: '[data-dashboard="night-count"]',
-  guestCount: '[data-dashboard="guest-count"]',
+  totalDeposit:
+    '[data-dashboard="total-deposit"]',
 
-  marketDay: '[data-dashboard="market-day"]',
-  marketNight: '[data-dashboard="market-night"]',
+  mealExpense:
+    '[data-dashboard="meal-expense"]',
 
-  warningSection: "[data-dashboard-warning-section]",
-  emptySection: "[data-dashboard-empty]",
+  currentBalance:
+    '[data-dashboard="current-balance"]',
+
+  balanceStatus:
+    '[data-dashboard="balance-status"]',
+
+  fullCount:
+    '[data-dashboard="full-count"]',
+
+  dayCount:
+    '[data-dashboard="day-count"]',
+
+  nightCount:
+    '[data-dashboard="night-count"]',
+
+  guestCount:
+    '[data-dashboard="guest-count"]',
+
+  marketDay:
+    '[data-dashboard="market-day"]',
+
+  marketNight:
+    '[data-dashboard="market-night"]',
+
+  warning:
+    "[data-dashboard-warning-section]",
+
+  empty:
+    "[data-dashboard-empty]",
 };
 
 
@@ -51,9 +85,10 @@ const DASHBOARD_SELECTORS = {
    STATE
    ========================================================= */
 
-const dashboardState = {
+const state = {
   user: null,
   mess: null,
+
   members: [],
   meals: [],
   guests: [],
@@ -78,23 +113,25 @@ document.addEventListener(
    ========================================================= */
 
 async function initializeDashboard() {
-  /*
-   * Dashboard code should only run on the root dashboard.
-   */
+
   if (!isDashboardPage()) {
     return;
   }
 
+
   try {
-    const user = await getCurrentUser();
+
+    const user =
+      await getCurrentUser();
+
 
     if (!user) {
       return;
     }
 
-    dashboardState.user = user;
 
-    setDashboardLoading(true);
+    state.user = user;
+
 
     await loadDashboardData();
 
@@ -106,10 +143,6 @@ async function initializeDashboard() {
       "[Mealmate] Dashboard load error:",
       error
     );
-
-  } finally {
-
-    setDashboardLoading(false);
   }
 }
 
@@ -119,9 +152,11 @@ async function initializeDashboard() {
    ========================================================= */
 
 function isDashboardPage() {
+
   const path =
     window.location.pathname
       .replace(/\\/g, "/");
+
 
   return (
     path.endsWith("/") ||
@@ -131,13 +166,14 @@ function isDashboardPage() {
 
 
 /* =========================================================
-   LOAD DATA
+   LOAD DASHBOARD DATA
    ========================================================= */
 
 async function loadDashboardData() {
 
   const userId =
-    dashboardState.user?.id;
+    state.user?.id;
+
 
   if (!userId) {
     return;
@@ -145,70 +181,172 @@ async function loadDashboardData() {
 
 
   /*
-   * Current Mess
+   * -------------------------------------------------------
+   * 1. LOAD ALL MESSES OWNED BY USER
+   * -------------------------------------------------------
    */
+
   const {
-    data: membership,
-    error: membershipError,
+    data: messes,
+    error: messError,
   } = await supabase
-    .from("mess_users")
+    .from("mess")
     .select(`
-    id,
-    mess_id,
-    role,
-    active,
-    created_at,
-    mess:mess_id (
       id,
       name,
       room_start,
       room_end,
-      border_count
-    )
-  `)
-    .eq("user_id", userId)
-    .eq("active", true)
+      border_count,
+      created_at
+    `)
+    .eq("created_by", userId)
     .order("created_at", {
       ascending: false,
-    })
-    .limit(1)
-    .maybeSingle();
+    });
 
 
-  if (membershipError) {
-    throw membershipError;
+  if (messError) {
+    throw messError;
   }
 
 
-  const mess =
-    membership?.mess ?? null;
+  if (!Array.isArray(messes) || !messes.length) {
 
+    state.mess = null;
+    state.members = [];
+    state.meals = [];
+    state.guests = [];
+    state.transactions = [];
 
-  /*
-   * No Mess means setup is incomplete.
-   */
-  if (!mess) {
-    dashboardState.mess = null;
-    dashboardState.members = [];
-    dashboardState.meals = [];
-    dashboardState.guests = [];
-    dashboardState.transactions = [];
     return;
   }
 
 
-  dashboardState.mess = mess;
+  /*
+   * -------------------------------------------------------
+   * 2. RESOLVE CURRENT MESS
+   * -------------------------------------------------------
+   *
+   * Because the current test database contains multiple
+   * Mess rows for the same user, prefer the Mess that
+   * actually contains active members.
+   *
+   * This prevents old empty test Mess rows from winning.
+   * -------------------------------------------------------
+   */
+
+  const messIds =
+    messes.map(
+      (mess) => mess.id
+    );
 
 
-  const messId = mess.id;
+  const {
+    data: activeMembers,
+    error: activeMembersError,
+  } = await supabase
+    .from("members")
+    .select(`
+      id,
+      mess_id
+    `)
+    .in("mess_id", messIds)
+    .eq("active", true);
+
+
+  if (activeMembersError) {
+    throw activeMembersError;
+  }
+
+
+  const memberCountByMess =
+    new Map();
+
+
+  for (
+    const member of
+      activeMembers ?? []
+  ) {
+
+    const currentCount =
+      memberCountByMess.get(
+        member.mess_id
+      ) ?? 0;
+
+
+    memberCountByMess.set(
+      member.mess_id,
+      currentCount + 1
+    );
+  }
+
+
+  const sortedMesses =
+    [...messes].sort(
+      (a, b) => {
+
+        const memberCountA =
+          memberCountByMess.get(
+            a.id
+          ) ?? 0;
+
+        const memberCountB =
+          memberCountByMess.get(
+            b.id
+          ) ?? 0;
+
+
+        /*
+         * Prefer Mess with actual active members.
+         */
+
+        if (
+          memberCountA !==
+          memberCountB
+        ) {
+          return (
+            memberCountB -
+            memberCountA
+          );
+        }
+
+
+        /*
+         * If member count ties,
+         * newest Mess wins.
+         */
+
+        return (
+          new Date(b.created_at) -
+          new Date(a.created_at)
+        );
+      }
+    );
+
+
+  state.mess =
+    sortedMesses[0] ?? null;
+
+
+  if (!state.mess) {
+    return;
+  }
+
+
+  const messId =
+    state.mess.id;
+
 
   const today =
     getTodayDateString();
 
 
   /*
-   * Load all dashboard source data.
+   * -------------------------------------------------------
+   * 3. LOAD SOURCE DATA FOR CURRENT MESS
+   * -------------------------------------------------------
    */
+
   const [
     membersResult,
     mealsResult,
@@ -216,36 +354,55 @@ async function loadDashboardData() {
     transactionsResult,
   ] = await Promise.all([
 
+    /*
+     * Active members
+     */
     supabase
       .from("members")
       .select("id")
       .eq("mess_id", messId)
       .eq("active", true),
 
+
+    /*
+     * Today's member meals
+     *
+     * Current DB uses:
+     * - meal_type
+     * - expense
+     */
     supabase
       .from("daily_meals")
       .select(`
         meal_type,
-        day_rate_applied,
-        night_rate_applied,
-        full_rate_applied,
-        meal_expense,
-        market_day_count,
-        market_night_count
+        expense
       `)
       .eq("mess_id", messId)
       .eq("meal_date", today),
 
+
+    /*
+     * Today's guest meals
+     *
+     * Current DB uses:
+     * - quantity
+     * - rate
+     * - expense
+     */
     supabase
       .from("guest_meals")
       .select(`
-        guest_count,
-        guest_rate_applied,
-        total_expense
+        quantity,
+        rate,
+        expense
       `)
       .eq("mess_id", messId)
       .eq("meal_date", today),
 
+
+    /*
+     * All money transactions
+     */
     supabase
       .from("money_transactions")
       .select(`
@@ -256,27 +413,28 @@ async function loadDashboardData() {
   ]);
 
 
-  const resultError =
-    membersResult.error ||
-    mealsResult.error ||
-    guestsResult.error ||
+  const sourceError =
+    membersResult.error ??
+    mealsResult.error ??
+    guestsResult.error ??
     transactionsResult.error;
 
-  if (resultError) {
-    throw resultError;
+
+  if (sourceError) {
+    throw sourceError;
   }
 
 
-  dashboardState.members =
+  state.members =
     membersResult.data ?? [];
 
-  dashboardState.meals =
+  state.meals =
     mealsResult.data ?? [];
 
-  dashboardState.guests =
+  state.guests =
     guestsResult.data ?? [];
 
-  dashboardState.transactions =
+  state.transactions =
     transactionsResult.data ?? [];
 }
 
@@ -287,16 +445,13 @@ async function loadDashboardData() {
 
 function renderDashboard() {
 
-  const mess =
-    dashboardState.mess;
+  if (!state.mess) {
 
-  /*
-   * Empty state
-   */
-  if (!mess) {
     showEmptyState(true);
+
     return;
   }
+
 
   showEmptyState(false);
 
@@ -304,104 +459,119 @@ function renderDashboard() {
   /*
    * Mess
    */
+
   setText(
-    DASHBOARD_SELECTORS.messName,
-    mess.name
+    SELECTORS.messName,
+    state.mess.name
   );
 
 
   /*
-   * Member count
+   * Members
    */
+
   setText(
-    DASHBOARD_SELECTORS.memberCount,
-    `Member: ${dashboardState.members.length}`
+    SELECTORS.memberCount,
+    `Member: ${state.members.length}`
   );
 
 
   /*
-   * Meal summary
+   * Meals
    */
+
   const mealSummary =
     calculateMealSummary(
-      dashboardState.meals
+      state.meals
     );
 
 
   setText(
-    DASHBOARD_SELECTORS.fullCount,
+    SELECTORS.fullCount,
     mealSummary.full
   );
 
+
   setText(
-    DASHBOARD_SELECTORS.dayCount,
+    SELECTORS.dayCount,
     mealSummary.day
   );
 
+
   setText(
-    DASHBOARD_SELECTORS.nightCount,
+    SELECTORS.nightCount,
     mealSummary.night
   );
 
+
   setText(
-    DASHBOARD_SELECTORS.marketDay,
+    SELECTORS.marketDay,
     mealSummary.marketDay
   );
 
+
   setText(
-    DASHBOARD_SELECTORS.marketNight,
+    SELECTORS.marketNight,
     mealSummary.marketNight
   );
 
 
   /*
-   * Guest summary
+   * Guests
    */
-  const guestCount =
-    dashboardState.guests.reduce(
-      (total, item) =>
-        total +
-        Number(item.guest_count || 0),
-      0
+
+  const guestSummary =
+    calculateGuestSummary(
+      state.guests
     );
 
 
   setText(
-    DASHBOARD_SELECTORS.guestCount,
-    guestCount
+    SELECTORS.guestCount,
+    guestSummary.quantity
   );
 
 
   /*
-   * Money summary
+   * Money
    */
-  const money =
+
+  const moneySummary =
     calculateMoneySummary(
-      dashboardState.transactions
+      state.transactions
     );
 
 
+  const totalExpense =
+    mealSummary.expense +
+    guestSummary.expense;
+
+
   const currentBalance =
-    money.deposit -
-    money.refund +
-    money.adjustment -
-    money.other -
-    mealSummary.expense -
-    calculateGuestExpense();
+    moneySummary.deposit -
+    moneySummary.refund +
+    moneySummary.adjustment -
+    moneySummary.other -
+    totalExpense;
 
 
   setMoney(
-    DASHBOARD_SELECTORS.totalDeposit,
-    money.deposit
+    SELECTORS.totalDeposit,
+    moneySummary.deposit
   );
 
+
+  /*
+   * Meal Expense card shows member meal expense.
+   */
   setMoney(
-    DASHBOARD_SELECTORS.mealExpense,
+    SELECTORS.mealExpense,
     mealSummary.expense
   );
 
+
   setMoney(
-    DASHBOARD_SELECTORS.currentBalance,
+    SELECTORS.currentBalance,
     currentBalance
   );
 
@@ -413,7 +583,7 @@ function renderDashboard() {
 
 
 /* =========================================================
-   MEAL CALCULATION
+   MEAL SUMMARY
    ========================================================= */
 
 function calculateMealSummary(meals) {
@@ -430,42 +600,69 @@ function calculateMealSummary(meals) {
   };
 
 
-  meals.forEach((meal) => {
+  for (
+    const meal of
+      meals ?? []
+  ) {
 
-    switch (meal.meal_type) {
-
-      case "full":
-        summary.full += 1;
-        break;
-
-      case "day":
-        summary.day += 1;
-        break;
-
-      case "night":
-        summary.night += 1;
-        break;
-
-      default:
-        break;
-    }
+    const type =
+      String(
+        meal?.meal_type ?? ""
+      ).toLowerCase();
 
 
-    summary.marketDay +=
+    const expense =
       Number(
-        meal.market_day_count || 0
+        meal?.expense ?? 0
       );
 
-    summary.marketNight +=
-      Number(
-        meal.market_night_count || 0
-      );
 
     summary.expense +=
-      Number(
-        meal.meal_expense || 0
-      );
-  });
+      expense;
+
+
+    switch (type) {
+
+      case "full":
+
+        summary.full += 1;
+
+        /*
+         * FULL counts once in both
+         * Day and Night market.
+         */
+
+        summary.marketDay += 1;
+        summary.marketNight += 1;
+
+        break;
+
+
+      case "day":
+
+        summary.day += 1;
+
+        summary.marketDay += 1;
+
+        break;
+
+
+      case "night":
+
+        summary.night += 1;
+
+        summary.marketNight += 1;
+
+        break;
+
+
+      case "none":
+
+      default:
+
+        break;
+    }
+  }
 
 
   return summary;
@@ -473,12 +670,48 @@ function calculateMealSummary(meals) {
 
 
 /* =========================================================
-   MONEY CALCULATION
+   GUEST SUMMARY
    ========================================================= */
 
-function calculateMoneySummary(transactions) {
+function calculateGuestSummary(guests) {
 
-  const result = {
+  const summary = {
+    quantity: 0,
+    expense: 0,
+  };
+
+
+  for (
+    const guest of
+      guests ?? []
+  ) {
+
+    summary.quantity +=
+      Number(
+        guest?.quantity ?? 0
+      );
+
+
+    summary.expense +=
+      Number(
+        guest?.expense ?? 0
+      );
+  }
+
+
+  return summary;
+}
+
+
+/* =========================================================
+   MONEY SUMMARY
+   ========================================================= */
+
+function calculateMoneySummary(
+  transactions
+) {
+
+  const summary = {
     deposit: 0,
     refund: 0,
     adjustment: 0,
@@ -486,59 +719,63 @@ function calculateMoneySummary(transactions) {
   };
 
 
-  transactions.forEach(
-    (transaction) => {
+  for (
+    const transaction of
+      transactions ?? []
+  ) {
 
-      const amount =
-        Number(
-          transaction.amount || 0
-        );
-
-      switch (
-      transaction.transaction_type
-      ) {
-
-        case "deposit":
-          result.deposit += amount;
-          break;
-
-        case "refund":
-          result.refund += amount;
-          break;
-
-        case "adjustment":
-          result.adjustment += amount;
-          break;
-
-        case "other":
-          result.other += amount;
-          break;
-
-        default:
-          break;
-      }
-    }
-  );
-
-
-  return result;
-}
-
-
-/* =========================================================
-   GUEST EXPENSE
-   ========================================================= */
-
-function calculateGuestExpense() {
-
-  return dashboardState.guests.reduce(
-    (total, guest) =>
-      total +
+    const amount =
       Number(
-        guest.total_expense || 0
-      ),
-    0
-  );
+        transaction?.amount ?? 0
+      );
+
+
+    switch (
+      String(
+        transaction?.transaction_type ?? ""
+      ).toLowerCase()
+    ) {
+
+      case "deposit":
+
+        summary.deposit +=
+          amount;
+
+        break;
+
+
+      case "refund":
+
+        summary.refund +=
+          amount;
+
+        break;
+
+
+      case "adjustment":
+
+        summary.adjustment +=
+          amount;
+
+        break;
+
+
+      case "other":
+
+        summary.other +=
+          amount;
+
+        break;
+
+
+      default:
+
+        break;
+    }
+  }
+
+
+  return summary;
 }
 
 
@@ -546,12 +783,15 @@ function calculateGuestExpense() {
    BALANCE STATUS
    ========================================================= */
 
-function renderBalanceStatus(balance) {
+function renderBalanceStatus(
+  balance
+) {
 
   const element =
     document.querySelector(
-      DASHBOARD_SELECTORS.balanceStatus
+      SELECTORS.balanceStatus
     );
+
 
   if (!element) {
     return;
@@ -584,38 +824,73 @@ function renderBalanceStatus(balance) {
   }
 
 
-  const warningSection =
+  const warning =
     document.querySelector(
-      DASHBOARD_SELECTORS.warningSection
+      SELECTORS.warning
     );
 
-  if (warningSection) {
 
-    warningSection.hidden =
+  if (warning) {
+
+    warning.hidden =
       balance > -500;
   }
 }
 
 
 /* =========================================================
-   UI HELPERS
+   EMPTY STATE
    ========================================================= */
 
-function setText(selector, value) {
+function showEmptyState(
+  show
+) {
 
   const element =
-    document.querySelector(selector);
+    document.querySelector(
+      SELECTORS.empty
+    );
+
 
   if (!element) {
     return;
   }
+
+
+  element.hidden =
+    !show;
+}
+
+
+/* =========================================================
+   TEXT / MONEY
+   ========================================================= */
+
+function setText(
+  selector,
+  value
+) {
+
+  const element =
+    document.querySelector(
+      selector
+    );
+
+
+  if (!element) {
+    return;
+  }
+
 
   element.textContent =
     String(value);
 }
 
 
-function setMoney(selector, value) {
+function setMoney(
+  selector,
+  value
+) {
 
   setText(
     selector,
@@ -624,47 +899,19 @@ function setMoney(selector, value) {
 }
 
 
-function formatMoney(value) {
+function formatMoney(
+  value
+) {
 
-  return Number(value || 0)
-    .toLocaleString(
-      "en-BD",
-      {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-      }
-    );
-}
-
-
-function setDashboardLoading(isLoading) {
-
-  const dashboard =
-    document.querySelector(
-      ".main-content"
-    );
-
-  if (!dashboard) {
-    return;
-  }
-
-  dashboard.dataset.loading =
-    String(isLoading);
-}
-
-
-function showEmptyState(show) {
-
-  const element =
-    document.querySelector(
-      DASHBOARD_SELECTORS.emptySection
-    );
-
-  if (!element) {
-    return;
-  }
-
-  element.hidden = !show;
+  return Number(
+    value || 0
+  ).toLocaleString(
+    "en-BD",
+    {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2,
+    }
+  );
 }
 
 
@@ -674,20 +921,23 @@ function showEmptyState(show) {
 
 function getTodayDateString() {
 
-  const now =
+  const date =
     new Date();
 
+
   const year =
-    now.getFullYear();
+    date.getFullYear();
+
 
   const month =
     String(
-      now.getMonth() + 1
+      date.getMonth() + 1
     ).padStart(2, "0");
+
 
   const day =
     String(
-      now.getDate()
+      date.getDate()
     ).padStart(2, "0");
 
 
