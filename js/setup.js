@@ -1,18 +1,18 @@
- /* =========================================================
-    Mealmate — Mess Setup Controller
-    File: js/setup.js
+/* =========================================================
+   Mealmate — Mess Setup Controller
+   File: js/setup.js
 
-    Responsibilities:
-    - Setup wizard step navigation
-    - Mess information validation
-    - Room preview
-    - Member row generation
-    - Member search
-    - Initial meal-rate validation
-    - Secure Mess creation through Supabase RPC
-    - Initial member creation
-    - Redirect to dashboard after successful setup
-    ========================================================= */
+   Responsibilities:
+   - Setup wizard step navigation
+   - Mess information validation
+   - Room preview
+   - Member row generation
+   - Member search
+   - Initial meal-rate validation
+   - Secure Mess creation through Supabase RPC
+   - Initial member creation
+   - Redirect to dashboard after successful setup
+   ========================================================= */
 
 import {
   APP_CONFIG,
@@ -1097,33 +1097,26 @@ async function handleSubmit(event) {
    ========================================================= */
 
 async function createMess(userId) {
+  const today = new Date();
+
+  const effectiveDate =
+    [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0"),
+    ].join("-");
+
   const payload = {
-    p_name:
-      messNameInput.value.trim(),
-
-    p_room_start:
-      Number(roomStartInput.value),
-
-    p_room_end:
-      Number(roomEndInput.value),
-
-    p_border_count:
-      Number(borderCountInput.value),
-
-    p_day_rate:
-      toMoney(dayRateInput.value),
-
-    p_night_rate:
-      toMoney(nightRateInput.value),
-
-    p_full_rate:
-      toMoney(fullRateInput.value),
-
-    p_guest_rate:
-      toMoney(guestRateInput.value),
-
-    p_friday_feast_rate:
-      toMoney(fridayFeastRateInput.value),
+    p_name: messNameInput.value.trim(),
+    p_room_start: Number(roomStartInput.value),
+    p_room_end: Number(roomEndInput.value),
+    p_border_count: Number(borderCountInput.value),
+    p_day_rate: toMoney(dayRateInput.value),
+    p_night_rate: toMoney(nightRateInput.value),
+    p_full_rate: toMoney(fullRateInput.value),
+    p_guest_rate: toMoney(guestRateInput.value),
+    p_feast_rate: toMoney(fridayFeastRateInput.value),
+    p_effective_date: effectiveDate,
   };
 
 
@@ -1149,16 +1142,19 @@ async function createMess(userId) {
   }
 
 
-  const mess =
-    normalizeCreatedMess(data);
-
-
-  if (!mess?.id) {
+  if (!data) {
     throw new Error(
       "Mess তৈরি হয়েছে কিনা নিশ্চিত করা যায়নি।"
     );
   }
 
+  const mess = {
+    id: data,
+    name: messNameInput.value.trim(),
+    room_start: Number(roomStartInput.value),
+    room_end: Number(roomEndInput.value),
+    border_count: Number(borderCountInput.value),
+  };
 
   return mess;
 }
@@ -1552,8 +1548,8 @@ export function getSetupState() {
     createdMess:
       state.createdMess
         ? {
-            ...state.createdMess,
-          }
+          ...state.createdMess,
+        }
         : null,
 
     submitting:
