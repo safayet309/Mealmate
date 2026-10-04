@@ -1,0 +1,732 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0B6B4F"
+  >
+
+  <meta
+    name="description"
+    content="Mealmate — Member and Room Management"
+  >
+
+  <title>Members — Mealmate</title>
+
+  <link
+    rel="manifest"
+    href="../manifest.webmanifest"
+  >
+
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="192x192"
+    href="../assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="../assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/variables.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/global.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/components.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/responsive.css"
+  >
+</head>
+
+<body>
+
+  <noscript>
+    <div class="noscript-message">
+      Mealmate চালাতে JavaScript চালু করুন।
+    </div>
+  </noscript>
+
+
+  <div
+    id="app"
+    class="app-shell"
+    aria-live="polite"
+  >
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header
+      class="app-header"
+      data-app-header
+    >
+
+      <div class="app-header__inner">
+
+        <button
+          class="icon-button app-header__menu"
+          type="button"
+          data-action="toggle-sidebar"
+          aria-label="Navigation menu"
+          aria-controls="app-sidebar"
+          aria-expanded="false"
+        >
+          <span aria-hidden="true">☰</span>
+        </button>
+
+
+        <a
+          class="brand"
+          href="../index.html"
+          data-route="dashboard"
+          aria-label="Mealmate Home"
+        >
+
+          <span
+            class="brand__mark"
+            aria-hidden="true"
+          >
+            M
+          </span>
+
+          <span class="brand__text">
+
+            <strong>
+              Mealmate
+            </strong>
+
+            <small>
+              Mess Meal Management
+            </small>
+
+          </span>
+
+        </a>
+
+
+        <div class="app-header__actions">
+
+          <span
+            class="sync-status"
+            data-sync-status
+          >
+            Offline
+          </span>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         APP LAYOUT
+         ===================================================== -->
+
+    <div class="app-layout">
+
+
+      <!-- ===================================================
+           SIDEBAR
+           =================================================== -->
+
+      <aside
+        id="app-sidebar"
+        class="app-sidebar"
+        data-app-sidebar
+        aria-label="Main navigation"
+      >
+
+        <nav class="main-nav">
+
+          <a
+            class="nav-item"
+            href="../index.html"
+            data-route="dashboard"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ⌂
+            </span>
+
+            <span>
+              Dashboard
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item"
+            href="./meals.html"
+            data-route="meals"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ▣
+            </span>
+
+            <span>
+              Today's Meals
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item is-active"
+            href="./members.html"
+            data-route="members"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ♙
+            </span>
+
+            <span>
+              Members
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item"
+            href="./reports.html"
+            data-route="reports"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ▤
+            </span>
+
+            <span>
+              Reports
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item"
+            href="./settings.html"
+            data-route="settings"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ⚙
+            </span>
+
+            <span>
+              Settings
+            </span>
+          </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+          <small>
+            Mealmate
+          </small>
+
+          <span data-app-version>
+            v0.1.0
+          </span>
+
+        </div>
+
+      </aside>
+
+
+      <!-- ===================================================
+           MAIN CONTENT
+           =================================================== -->
+
+      <main
+        id="main-content"
+        class="main-content"
+        tabindex="-1"
+      >
+
+
+        <!-- ================================================
+             PAGE HEADER
+             ================================================ -->
+
+        <section
+          class="page-header"
+          aria-labelledby="page-title"
+        >
+
+          <div>
+
+            <p class="eyebrow">
+              MEMBER MANAGEMENT
+            </p>
+
+            <h1 id="page-title">
+              Members
+            </h1>
+
+            <p class="page-date">
+              Room ও Member পরিচালনা করুন
+            </p>
+
+          </div>
+
+
+          <div class="page-header__actions">
+
+            <button
+              class="button button--primary"
+              type="button"
+              data-action="add-member"
+            >
+              + Add Member
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             MESS / ROOM INFO
+             ================================================ -->
+
+        <section
+          class="content-section"
+          aria-label="Mess information"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                MESS
+              </p>
+
+              <h2 data-members="mess-name">
+                Loading…
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-grid">
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Room Range
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-members="room-range"
+              >
+                —
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Total Rooms
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-members="room-count"
+              >
+                0
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Active Members
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-members="active-count"
+              >
+                0
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Inactive Members
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-members="inactive-count"
+              >
+                0
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             TOOLBAR
+             ================================================ -->
+
+        <section
+          class="content-section"
+          aria-label="Member filters"
+        >
+
+          <div class="toolbar">
+
+            <div class="field">
+
+              <label
+                class="field__label"
+                for="member-search"
+              >
+                Search Member
+              </label>
+
+              <input
+                id="member-search"
+                class="input"
+                type="search"
+                placeholder="Member name লিখুন…"
+                autocomplete="off"
+                data-members-search
+              >
+
+            </div>
+
+
+            <div class="field">
+
+              <label
+                class="field__label"
+                for="member-status-filter"
+              >
+                Status
+              </label>
+
+              <select
+                id="member-status-filter"
+                class="input"
+                data-members-status-filter
+              >
+
+                <option value="active">
+                  Active
+                </option>
+
+                <option value="inactive">
+                  Inactive
+                </option>
+
+                <option value="all">
+                  All
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             MEMBER LIST
+             ================================================ -->
+
+        <section
+          class="content-section"
+          aria-labelledby="member-list-title"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                MEMBERS
+              </p>
+
+              <h2 id="member-list-title">
+                Member List
+              </h2>
+
+            </div>
+
+            <span
+              class="badge"
+              data-members="visible-count"
+            >
+              0
+            </span>
+
+          </div>
+
+
+          <div
+            class="table-wrapper"
+            data-members-table-wrapper
+          >
+
+            <table class="data-table">
+
+              <thead>
+
+                <tr>
+
+                  <th scope="col">
+                    Room
+                  </th>
+
+                  <th scope="col">
+                    Member
+                  </th>
+
+                  <th scope="col">
+                    Status
+                  </th>
+
+                  <th scope="col">
+                    Joined
+                  </th>
+
+                  <th
+                    scope="col"
+                    class="text-right"
+                  >
+                    Action
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody
+                data-members-list
+              >
+
+                <tr>
+
+                  <td
+                    colspan="5"
+                    class="table-empty"
+                  >
+                    Loading members…
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+
+          <!-- Empty state -->
+
+          <div
+            class="empty-state"
+            data-members-empty
+            hidden
+          >
+
+            <div
+              class="empty-state__icon"
+              aria-hidden="true"
+            >
+              ♙
+            </div>
+
+            <h2>
+              এখনো কোনো Member নেই
+            </h2>
+
+            <p>
+              প্রথম Member যোগ করে শুরু করুন।
+            </p>
+
+            <button
+              class="button button--primary"
+              type="button"
+              data-action="add-member"
+            >
+              + Add Member
+            </button>
+
+          </div>
+
+        </section>
+
+
+      </main>
+
+    </div>
+
+
+    <!-- =====================================================
+         MOBILE NAV
+         ===================================================== -->
+
+    <nav
+      class="bottom-nav"
+      aria-label="Quick navigation"
+    >
+
+      <a
+        class="bottom-nav__item"
+        href="../index.html"
+        data-route="dashboard"
+      >
+
+        <span aria-hidden="true">
+          ⌂
+        </span>
+
+        <small>
+          Home
+        </small>
+
+      </a>
+
+
+      <a
+        class="bottom-nav__item"
+        href="./meals.html"
+        data-route="meals"
+      >
+
+        <span aria-hidden="true">
+          ▣
+        </span>
+
+        <small>
+          Meals
+        </small>
+
+      </a>
+
+
+      <a
+        class="bottom-nav__item is-active"
+        href="./members.html"
+        data-route="members"
+      >
+
+        <span aria-hidden="true">
+          ♙
+        </span>
+
+        <small>
+          Members
+        </small>
+
+      </a>
+
+
+      <a
+        class="bottom-nav__item"
+        href="./reports.html"
+        data-route="reports"
+      >
+
+        <span aria-hidden="true">
+          ▤
+        </span>
+
+        <small>
+          Reports
+        </small>
+
+      </a>
+
+    </nav>
+
+
+    <!-- =====================================================
+         TOAST + MODAL ROOT
+         ===================================================== -->
+
+    <div
+      id="toast-root"
+      class="toast-root"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+    <div
+      id="modal-root"
+      class="modal-root"
+      aria-live="polite"
+    ></div>
+
+
+  </div>
+
+
+  <!-- =======================================================
+       JAVASCRIPT
+       ======================================================= -->
+
+  <script
+    type="module"
+    src="../js/app.js"
+  ></script>
+
+</body>
+</html>
