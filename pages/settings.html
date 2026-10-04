@@ -1,0 +1,1023 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="theme-color"
+    content="#0B6B4F"
+  >
+
+  <meta
+    name="description"
+    content="Mealmate — Mess Settings and Meal Rates"
+  >
+
+  <title>Settings — Mealmate</title>
+
+  <link
+    rel="manifest"
+    href="../manifest.webmanifest"
+  >
+
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="192x192"
+    href="../assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="apple-touch-icon"
+    href="../assets/icons/icon-192.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/variables.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/global.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/components.css"
+  >
+
+  <link
+    rel="stylesheet"
+    href="../css/responsive.css"
+  >
+</head>
+
+
+<body>
+
+  <noscript>
+    <div class="noscript-message">
+      Mealmate চালাতে JavaScript চালু করুন।
+    </div>
+  </noscript>
+
+
+  <div
+    id="app"
+    class="app-shell"
+    aria-live="polite"
+  >
+
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
+    <header
+      class="app-header"
+      data-app-header
+    >
+
+      <div class="app-header__inner">
+
+        <button
+          class="icon-button app-header__menu"
+          type="button"
+          data-action="toggle-sidebar"
+          aria-label="Navigation menu"
+          aria-controls="app-sidebar"
+          aria-expanded="false"
+        >
+          <span aria-hidden="true">☰</span>
+        </button>
+
+
+        <a
+          class="brand"
+          href="../index.html"
+          data-route="dashboard"
+          aria-label="Mealmate Home"
+        >
+
+          <span
+            class="brand__mark"
+            aria-hidden="true"
+          >
+            M
+          </span>
+
+          <span class="brand__text">
+
+            <strong>
+              Mealmate
+            </strong>
+
+            <small>
+              Mess Meal Management
+            </small>
+
+          </span>
+
+        </a>
+
+
+        <div class="app-header__actions">
+
+          <span
+            class="sync-status"
+            data-sync-status
+          >
+            Offline
+          </span>
+
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <!-- =====================================================
+         APP LAYOUT
+         ===================================================== -->
+
+    <div class="app-layout">
+
+
+      <!-- ===================================================
+           SIDEBAR
+           =================================================== -->
+
+      <aside
+        id="app-sidebar"
+        class="app-sidebar"
+        data-app-sidebar
+        aria-label="Main navigation"
+      >
+
+        <nav class="main-nav">
+
+          <a
+            class="nav-item"
+            href="../index.html"
+            data-route="dashboard"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ⌂
+            </span>
+
+            <span>
+              Dashboard
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item"
+            href="./meals.html"
+            data-route="meals"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ▣
+            </span>
+
+            <span>
+              Today's Meals
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item"
+            href="./members.html"
+            data-route="members"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ♙
+            </span>
+
+            <span>
+              Members
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item"
+            href="./reports.html"
+            data-route="reports"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ▤
+            </span>
+
+            <span>
+              Reports
+            </span>
+          </a>
+
+
+          <a
+            class="nav-item is-active"
+            href="./settings.html"
+            data-route="settings"
+          >
+            <span
+              class="nav-item__icon"
+              aria-hidden="true"
+            >
+              ⚙
+            </span>
+
+            <span>
+              Settings
+            </span>
+          </a>
+
+        </nav>
+
+
+        <div class="sidebar-footer">
+
+          <small>
+            Mealmate
+          </small>
+
+          <span data-app-version>
+            v0.1.0
+          </span>
+
+        </div>
+
+      </aside>
+
+
+      <!-- ===================================================
+           MAIN CONTENT
+           =================================================== -->
+
+      <main
+        id="main-content"
+        class="main-content"
+        tabindex="-1"
+      >
+
+
+        <!-- ================================================
+             PAGE HEADER
+             ================================================ -->
+
+        <section
+          class="page-header"
+          aria-labelledby="page-title"
+        >
+
+          <div>
+
+            <p class="eyebrow">
+              SETTINGS
+            </p>
+
+            <h1 id="page-title">
+              Settings
+            </h1>
+
+            <p class="page-date">
+              Mess এবং Meal Rate পরিচালনা করুন
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             MESS INFORMATION
+             ================================================ -->
+
+        <section
+          class="content-section"
+          aria-labelledby="mess-info-title"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                MESS
+              </p>
+
+              <h2 id="mess-info-title">
+                Mess Information
+              </h2>
+
+            </div>
+
+          </div>
+
+
+          <div class="dashboard-grid">
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Mess Name
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-settings="mess-name"
+              >
+                Loading…
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Room Range
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-settings="room-range"
+              >
+                —
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Border Count
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-settings="border-count"
+              >
+                0
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Currency
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-settings="currency"
+              >
+                BDT
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             CURRENT MEAL RATE
+             ================================================ -->
+
+        <section
+          class="content-section"
+          aria-labelledby="current-rate-title"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                CURRENT RATE
+              </p>
+
+              <h2 id="current-rate-title">
+                বর্তমান Meal Rate
+              </h2>
+
+            </div>
+
+            <span
+              class="badge"
+              data-rates-current-date
+            >
+              Loading…
+            </span>
+
+          </div>
+
+
+          <div class="dashboard-grid">
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Day Meal
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-rate="day"
+              >
+                ৳0
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Night Meal
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-rate="night"
+              >
+                ৳0
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Full Meal
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-rate="full"
+              >
+                ৳0
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Guest Meal
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-rate="guest"
+              >
+                ৳0
+              </div>
+
+            </article>
+
+
+            <article class="stat-card">
+
+              <div class="stat-card__label">
+                Friday Feast
+              </div>
+
+              <div
+                class="stat-card__value"
+                data-rate="feast"
+              >
+                ৳0
+              </div>
+
+            </article>
+
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================
+             NEW RATE VERSION
+             ================================================ -->
+
+        <section
+          class="content-section"
+          aria-labelledby="new-rate-title"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                RATE MANAGEMENT
+              </p>
+
+              <h2 id="new-rate-title">
+                নতুন Meal Rate সেট করুন
+              </h2>
+
+              <p>
+                নতুন Rate একটি নতুন version হিসেবে সংরক্ষিত হবে।
+                পুরোনো Rate পরিবর্তন হবে না।
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <form
+            data-rate-form
+            novalidate
+          >
+
+
+            <!-- Effective Date -->
+
+            <div class="field">
+
+              <label
+                class="field__label"
+                for="rate-effective-date"
+              >
+                Effective Date
+              </label>
+
+              <input
+                id="rate-effective-date"
+                class="input"
+                type="date"
+                required
+                data-rate-input="effective-date"
+              >
+
+              <p
+                class="form-error"
+                data-rate-error="effective-date"
+              ></p>
+
+              <small class="field__hint">
+                এই তারিখ থেকে নতুন Rate প্রযোজ্য হবে।
+              </small>
+
+            </div>
+
+
+            <!-- Rates -->
+
+            <div class="dashboard-grid">
+
+
+              <div class="field">
+
+                <label
+                  class="field__label"
+                  for="rate-day"
+                >
+                  Day Meal
+                </label>
+
+                <input
+                  id="rate-day"
+                  class="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                  data-rate-input="day"
+                  placeholder="0.00"
+                >
+
+                <p
+                  class="form-error"
+                  data-rate-error="day"
+                ></p>
+
+              </div>
+
+
+              <div class="field">
+
+                <label
+                  class="field__label"
+                  for="rate-night"
+                >
+                  Night Meal
+                </label>
+
+                <input
+                  id="rate-night"
+                  class="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                  data-rate-input="night"
+                  placeholder="0.00"
+                >
+
+                <p
+                  class="form-error"
+                  data-rate-error="night"
+                ></p>
+
+              </div>
+
+
+              <div class="field">
+
+                <label
+                  class="field__label"
+                  for="rate-full"
+                >
+                  Full Meal
+                </label>
+
+                <input
+                  id="rate-full"
+                  class="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                  data-rate-input="full"
+                  placeholder="0.00"
+                >
+
+                <p
+                  class="form-error"
+                  data-rate-error="full"
+                ></p>
+
+              </div>
+
+
+              <div class="field">
+
+                <label
+                  class="field__label"
+                  for="rate-guest"
+                >
+                  Guest Meal
+                </label>
+
+                <input
+                  id="rate-guest"
+                  class="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                  data-rate-input="guest"
+                  placeholder="0.00"
+                >
+
+                <p
+                  class="form-error"
+                  data-rate-error="guest"
+                ></p>
+
+              </div>
+
+
+              <div class="field">
+
+                <label
+                  class="field__label"
+                  for="rate-feast"
+                >
+                  Friday Feast
+                </label>
+
+                <input
+                  id="rate-feast"
+                  class="input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                  required
+                  data-rate-input="feast"
+                  placeholder="0.00"
+                >
+
+                <p
+                  class="form-error"
+                  data-rate-error="feast"
+                ></p>
+
+              </div>
+
+
+            </div>
+
+
+            <!-- Protection Notice -->
+
+            <div class="notice notice--success">
+
+              <strong>
+                Historical rate protection
+              </strong>
+
+              <p>
+                আগে সংরক্ষিত Meal record-এর applied rate
+                নতুন Rate দিয়ে পরিবর্তন হবে না।
+              </p>
+
+            </div>
+
+
+            <!-- Form Actions -->
+
+            <div
+              class="page-header__actions"
+              data-rate-form-actions
+            >
+
+              <button
+                class="button button--secondary"
+                type="reset"
+                data-rate-action="reset"
+              >
+                Reset
+              </button>
+
+              <button
+                class="button button--primary"
+                type="submit"
+                data-rate-action="save"
+              >
+                Save New Rate
+              </button>
+
+            </div>
+
+
+            <div
+              class="form-error"
+              role="alert"
+              data-rate-form-error
+            ></div>
+
+
+          </form>
+
+        </section>
+
+
+        <!-- ================================================
+             RATE HISTORY
+             ================================================ -->
+
+        <section
+          class="content-section"
+          aria-labelledby="rate-history-title"
+        >
+
+          <div class="section-heading">
+
+            <div>
+
+              <p class="eyebrow">
+                HISTORY
+              </p>
+
+              <h2 id="rate-history-title">
+                Rate History
+              </h2>
+
+              <p>
+                পুরোনো Rate edit বা delete করা যাবে না।
+              </p>
+
+            </div>
+
+            <span
+              class="badge"
+              data-rates-history-count
+            >
+              0
+            </span>
+
+          </div>
+
+
+          <div class="table-wrapper">
+
+            <table class="data-table">
+
+              <thead>
+
+                <tr>
+
+                  <th scope="col">
+                    Effective Date
+                  </th>
+
+                  <th scope="col">
+                    Day
+                  </th>
+
+                  <th scope="col">
+                    Night
+                  </th>
+
+                  <th scope="col">
+                    Full
+                  </th>
+
+                  <th scope="col">
+                    Guest
+                  </th>
+
+                  <th scope="col">
+                    Feast
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody
+                data-rates-history
+              >
+
+                <tr>
+
+                  <td
+                    colspan="6"
+                    class="table-empty"
+                  >
+                    Loading rate history…
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+      </main>
+
+    </div>
+
+
+    <!-- =====================================================
+         MOBILE NAV
+         ===================================================== -->
+
+    <nav
+      class="bottom-nav"
+      aria-label="Quick navigation"
+    >
+
+      <a
+        class="bottom-nav__item"
+        href="../index.html"
+        data-route="dashboard"
+      >
+
+        <span aria-hidden="true">
+          ⌂
+        </span>
+
+        <small>
+          Home
+        </small>
+
+      </a>
+
+
+      <a
+        class="bottom-nav__item"
+        href="./meals.html"
+        data-route="meals"
+      >
+
+        <span aria-hidden="true">
+          ▣
+        </span>
+
+        <small>
+          Meals
+        </small>
+
+      </a>
+
+
+      <a
+        class="bottom-nav__item"
+        href="./members.html"
+        data-route="members"
+      >
+
+        <span aria-hidden="true">
+          ♙
+        </span>
+
+        <small>
+          Members
+        </small>
+
+      </a>
+
+
+      <a
+        class="bottom-nav__item is-active"
+        href="./settings.html"
+        data-route="settings"
+      >
+
+        <span aria-hidden="true">
+          ⚙
+        </span>
+
+        <small>
+          Settings
+        </small>
+
+      </a>
+
+    </nav>
+
+
+    <!-- =====================================================
+         TOAST + MODAL
+         ===================================================== -->
+
+    <div
+      id="toast-root"
+      class="toast-root"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
+
+
+    <div
+      id="modal-root"
+      class="modal-root"
+      aria-live="polite"
+    ></div>
+
+
+  </div>
+
+
+  <!-- =======================================================
+       JAVASCRIPT
+       ======================================================= -->
+
+  <script
+    type="module"
+    src="../js/meal-rates.js"
+  ></script>
+
+  <script
+    type="module"
+    src="../js/app.js"
+  ></script>
+
+</body>
+</html>
